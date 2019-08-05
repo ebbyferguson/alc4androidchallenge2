@@ -50,8 +50,14 @@ public class DealActivity extends AppCompatActivity {
         switch (item.getItemId()){
             case R.id.save_menu:
                 saveDeal();
-                Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Deal Saved", Toast.LENGTH_SHORT).show();
                 clean();
+                backToList();
+                return true;
+            case R.id.delete_menu:
+                deleteDeal();
+                Toast.makeText(this, "Deal Deleted", Toast.LENGTH_SHORT).show();
+                backToList();
                 return true;
                 default:
                     return super.onOptionsItemSelected(item);
@@ -67,16 +73,32 @@ public class DealActivity extends AppCompatActivity {
     }
 
     public void saveDeal(){
-        String title = txtTitle.getText().toString();
-        String description = txtDescription.getText().toString();
-        String price = txtPrice.getText().toString();
+        deal.setTitle(txtTitle.getText().toString());
+        deal.setDescription(txtDescription.getText().toString());
+        deal.setPrice(txtPrice.getText().toString());
 
-        TravelDeal tDeal = new TravelDeal(title, description, price, "");
+        if (deal.getId() == null){
+            mDatabaseReference.push().setValue(deal);
+        }else {
+            mDatabaseReference.child(deal.getId()).setValue(deal);
+        }
 
-        mDatabaseReference.push().setValue(tDeal);
     }
 
-    public void clean(){
+    private void backToList(){
+        Intent iList = new Intent(this, ListActivity.class);
+        startActivity(iList);
+    }
+
+    private void deleteDeal(){
+        if (deal == null){
+            Toast.makeText(this, "Please save the deal before deleting", Toast.LENGTH_SHORT).show();
+        }else {
+            mDatabaseReference.child(deal.getId()).removeValue();
+        }
+    }
+
+    private void clean(){
         txtTitle.setText("");
         txtDescription.setText("");
         txtPrice.setText("");
